@@ -23,42 +23,20 @@ public class PageCrawlController {
 
     @RequestMapping("/google")
     public @ResponseBody PageResponse google(@RequestParam(value = "name", defaultValue = "World") String name) {
-
         WebDriver driver = new FirefoxDriver();
-
-        // And now use this to visit Google
         driver.get("http://www.google.com");
-        // Alternatively the same thing can be done like this
-        // driver.navigate().to("http://www.google.com");
-
-        // Find the text input element by its name
         WebElement element = driver.findElement(By.name("q"));
-
-        // Enter something to search for
         element.sendKeys("Cheese!");
-
-        // Now submit the form. WebDriver will find the form for us from the element
         element.submit();
-
-        // Check the title of the page
         System.out.println("Page title is: " + driver.getTitle());
-
-        // Google's search is rendered dynamically with JavaScript.
-        // Wait for the page to load, timeout after 10 seconds
         (new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
             public Boolean apply(WebDriver d) {
                 return d.getTitle().toLowerCase().startsWith("cheese!");
             }
         });
-
-        // Should see: "cheese! - Google Search"
         System.out.println("Page title is: " + driver.getTitle());
         String title = driver.getTitle();
-
-        //Close the browser
         driver.quit();
-
-
         return new PageResponse(counter.incrementAndGet(),
                 String.format(template, title));
     }
@@ -70,9 +48,7 @@ public class PageCrawlController {
         WebDriver driver = null;
         try {
             driver = new FirefoxDriver();
-            // And now use this to visit Google
             driver.get(url);
-
             do {
                 try {
                     Thread.sleep(6000);
@@ -86,7 +62,6 @@ public class PageCrawlController {
                 html = driver.getPageSource();
             }
             while (driver.findElement(By.className("browse-items-load-more-button")).isDisplayed());
-            //Close the browser
             driver.quit();
             return new PageResponse(counter.incrementAndGet(),
                     String.format(template, html));
@@ -106,7 +81,6 @@ public class PageCrawlController {
         WebDriver driver = null;
         try {
             driver = new FirefoxDriver();
-            // And now use this to visit Google
             driver.get(url);
             WebDriverWait wait13 = new WebDriverWait(driver, 5000);
             wait13.until(ExpectedConditions.visibilityOfElementLocated(By.className("_oidfu")));
@@ -124,8 +98,7 @@ public class PageCrawlController {
                 html = driver.getPageSource();
                 total++;
             }
-            while (total<2);
-            //Close the browser
+            while (total<20);
             driver.quit();
             return new PageResponse(counter.incrementAndGet(),
                     String.format(template, html));
