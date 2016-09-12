@@ -1,8 +1,12 @@
 package coole.co.seleserver;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,8 +26,10 @@ public class PageCrawlController {
     private final AtomicLong counter = new AtomicLong();
 
     @RequestMapping("/google")
-    public @ResponseBody PageResponse google(@RequestParam(value = "name", defaultValue = "World") String name) {
-        WebDriver driver = new FirefoxDriver();
+    public @ResponseBody PageResponse google(@RequestParam(value = "name", defaultValue = "World") String name) throws MalformedURLException {
+        DesiredCapabilities capability = DesiredCapabilities.chrome();
+        WebDriver driver = null;
+        driver = new RemoteWebDriver(new URL("http://52.209.50.101:4444/wd/hub"), capability);
         driver.get("http://www.google.com");
         WebElement element = driver.findElement(By.name("q"));
         element.sendKeys("Cheese!");
@@ -45,19 +51,17 @@ public class PageCrawlController {
     public @ResponseBody
     PageResponse youtube(@RequestParam(value = "url") String url) {
         String html = null;
+
+        DesiredCapabilities capability = DesiredCapabilities.chrome();
         WebDriver driver = null;
         try {
-            driver = new FirefoxDriver();
+            driver = new RemoteWebDriver(new URL("http://52.209.50.101:4444/wd/hub"), capability);
             driver.get(url);
+            Thread.sleep(2000);
             do {
-                try {
-                    Thread.sleep(6000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 System.out.println("do load more");
                 driver.findElement(By.className("browse-items-load-more-button")).click();
-                WebDriverWait wait13 = new WebDriverWait(driver, 5000);
+                WebDriverWait wait13 = new WebDriverWait(driver, 2000);
                 wait13.until(ExpectedConditions.visibilityOfElementLocated(By.className("browse-items-load-more-button")));
                 html = driver.getPageSource();
             }
